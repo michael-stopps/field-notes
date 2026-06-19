@@ -1,4 +1,4 @@
-## Interface: 120005
+## Interface: 120007
 ## Title: Field Notes
 ## Notes: Write and keep a collection of notes in a native UI environment.
 ## Author: Michael Stopps
@@ -7,4 +7,4 @@
 ## Category: User Interface
 ## IconTexture: Interface\Icons\inv_misc_note_04
 
-FieldNotes.lua
+field-notes.lua
