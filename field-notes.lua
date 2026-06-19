@@ -512,7 +512,7 @@ end)
 local loaderFrame = CreateFrame("Frame")
 loaderFrame:RegisterEvent("ADDON_LOADED")
 loaderFrame:SetScript("OnEvent",function(self,event,addonName)
-    if addonName == "FieldNotes" then
+    if addonName == "field-notes" then
         if FieldNotesDB == nil then
             FieldNotesDB = {}
         end
