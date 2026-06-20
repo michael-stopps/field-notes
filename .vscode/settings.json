@@ -22,6 +22,10 @@
         "StaticPopup_Show",
         "ObjectiveTrackerFrame",
         "ReloadUI",
-        "SOUNDKIT"
+        "SOUNDKIT",
+        "ChatEdit_ActivateChat",
+        "ChatEdit_ChooseBoxForSend",
+        "ChatFrame_AddMessageEventFilter",
+        "ChatFrame_OpenChat"
     ]
 }

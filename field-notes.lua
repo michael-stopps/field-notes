@@ -3,12 +3,11 @@
 ------------------------
 
 local NoteFrame = CreateFrame("Frame", "FieldNotesFrame", UIParent, "BasicFrameTemplate")
-NoteFrame:SetSize(600,400) -- W x H
-NoteFrame:SetPoint("CENTER",UIParent,"CENTER") -- Center of screen
-NoteFrame:Hide() -- Keep hidden until user types /note
+NoteFrame:SetSize(600,400)
+NoteFrame:SetPoint("CENTER",UIParent,"CENTER")
+NoteFrame:Hide()
 tinsert(UISpecialFrames, "FieldNotesFrame")
 
--- Drag it
 NoteFrame:SetMovable(true)
 NoteFrame:EnableMouse(true)
 NoteFrame:RegisterForDrag("LeftButton")
@@ -57,23 +56,22 @@ EditorBackground:SetBackdrop({
 
 local EditorScroll = CreateFrame("ScrollFrame", "FieldNotesEditorScroll", EditorBackground, "UIPanelScrollFrameTemplate")
 EditorScroll:SetPoint("TOPLEFT", EditorBackground, "TOPLEFT", 8, -8)
-EditorScroll:SetPoint("BOTTOMRIGHT", EditorBackground, "BOTTOMRIGHT", -27, 8) -- Leaves room for the scrollbar
+EditorScroll:SetPoint("BOTTOMRIGHT", EditorBackground, "BOTTOMRIGHT", -27, 8)
 
 local EditorBox = CreateFrame("EditBox", "FieldNotesEditorBox", EditorScroll)
 EditorBox:SetMultiLine(true)
-EditorBox:SetFontObject("MailTextFontNormal") -- Swapped to dark "ink" font for readability!
-EditorBox:SetWidth(345) -- Matches the new inner width of the scroll frame
+EditorBox:SetFontObject("MailTextFontNormal")
+EditorBox:SetWidth(345)
 EditorBox:SetAutoFocus(false)
-
 EditorBox:SetTextInsets(15, 15, 10, 10)
-
 EditorScroll:SetScrollChild(EditorBox)
 
 -----------------
 ---TAB CONTROL---
 -----------------
-local currentTab = "note" -- Default tab
-local currentNoteType = "note" -- Tracks the type of the currently open note
+
+local currentTab = "note"
+local currentNoteType = "note"
 
 local TabNotes = CreateFrame("Button", "FieldNotesTabNotes", NoteFrame, "UIPanelButtonTemplate")
 TabNotes:SetSize(80, 22)
@@ -90,7 +88,6 @@ TabTranscripts:SetText("Transcripts")
 ---------------
 
 local ListBackground = CreateFrame("Frame", "FieldNotesListBackground", NoteFrame, "BackdropTemplate")
--- Moved down to -55 to make room for the tabs!
 ListBackground:SetPoint("TOPLEFT", NoteFrame, "TOPLEFT", 15, -55) 
 ListBackground:SetPoint("BOTTOMRIGHT", EditorBackground, "BOTTOMLEFT", -15, 0)
 
@@ -121,14 +118,12 @@ local function AddDelayedTooltip(button, tooltipText)
         if tooltipTimer then
             tooltipTimer:Cancel()
         end
-
         tooltipTimer = C_Timer.NewTimer(1,function()
             GameTooltip:SetOwner(self, "ANCHOR_TOP")
             GameTooltip:SetText(tooltipText)
             GameTooltip:Show()
         end)
     end)
-
     button:SetScript("OnLeave", function()
         if tooltipTimer then
             tooltipTimer:Cancel()
@@ -145,36 +140,39 @@ AddDelayedTooltip(AddButton, "Add New Note")
 
 local SaveButton = CreateFrame("Button", nil, NoteFrame, "UIPanelButtonTemplate")
 SaveButton:SetSize(30,30)
-SaveButton:SetPoint("LEFT", AddButton, "RIGHT", 5, 0) -- Anchor to right of addbutton
+SaveButton:SetPoint("LEFT", AddButton, "RIGHT", 5, 0)
 SaveButton:SetText("S")
 AddDelayedTooltip(SaveButton,"Manually Save and Reload")
 
 local DeleteButton = CreateFrame("Button", nil, NoteFrame, "UIPanelButtonTemplate")
 DeleteButton:SetSize(30,30)
-DeleteButton:SetPoint("LEFT",SaveButton,"RIGHT",5,0) -- Anchor to right of savebutton
+DeleteButton:SetPoint("LEFT",SaveButton,"RIGHT",5,0)
 DeleteButton:SetText("-")
 AddDelayedTooltip(DeleteButton, "Delete Selected Note")
+
+local ShareButton = CreateFrame("Button", nil, NoteFrame, "UIPanelButtonTemplate")
+ShareButton:SetSize(30,30)
+ShareButton:SetPoint("LEFT",DeleteButton,"RIGHT",5,0)
+ShareButton:SetText("^")
+AddDelayedTooltip(ShareButton, "Share Note to Chat")
 
 local ToolbarDivider = NoteFrame:CreateTexture(nil, "ARTWORK")
 ToolbarDivider:SetColorTexture(0, 0, 0, 0)
 ToolbarDivider:SetPoint("TOPLEFT", EditorBackground, "BOTTOMLEFT", 0, -5)
 ToolbarDivider:SetPoint("BOTTOMRIGHT", EditorBackground, "BOTTOMRIGHT", 0, -30)
 
--- Bullet Button
 local BulletButton = CreateFrame("Button", nil, NoteFrame, "UIPanelButtonTemplate")
 BulletButton:SetSize(30, 30)
-BulletButton:SetPoint("LEFT", ToolbarDivider, "LEFT", 0, 0) -- Anchor to left side of Editor
+BulletButton:SetPoint("LEFT", ToolbarDivider, "LEFT", 0, 0)
 BulletButton:SetText("-")
 AddDelayedTooltip(BulletButton, "Insert Bullet")
 
--- Task Checkbox Button
 local TaskButton = CreateFrame("Button", nil, NoteFrame, "UIPanelButtonTemplate")
 TaskButton:SetSize(40, 30)
 TaskButton:SetPoint("LEFT", BulletButton, "RIGHT", 5, 0)
 TaskButton:SetText("[ ]")
 AddDelayedTooltip(TaskButton, "Insert Task")
 
--- Task Done Button
 local TaskDoneButton = CreateFrame("Button", nil, NoteFrame, "UIPanelButtonTemplate")
 TaskDoneButton:SetSize(40, 30)
 TaskDoneButton:SetPoint("LEFT", TaskButton, "RIGHT", 5, 0)
@@ -189,7 +187,6 @@ local currentNoteID = nil
 local noteButtons = {} 
 
 local function UpdateListDisplay()
-    -- Hide all buttons
     for _, btn in ipairs(noteButtons) do
         btn:Hide()
     end
@@ -198,10 +195,8 @@ local function UpdateListDisplay()
     local buttonIndex = 1
 
     for id, noteData in pairs(FieldNotesDB) do
-        -- Backwards compatibility: If no type is set, assume it's a standard note
         local nType = noteData.type or "note"
 
-        -- ONLY display notes that match the current tab
         if nType == currentTab then
             local btn = noteButtons[buttonIndex]
             
@@ -246,9 +241,8 @@ local function UpdateListDisplay()
 
             btn:SetScript("OnClick", function()
                 currentNoteID = noteData.id
-                currentNoteType = nType -- Save the type of the note we just opened
+                currentNoteType = nType
                 EditorBox:SetText(noteData.text)
-                -- print("FieldNotes: Loaded '" .. noteData.name .. "'")
 
                 for _, b in ipairs(noteButtons) do
                     if b.noteID == currentNoteID then
@@ -267,7 +261,6 @@ local function UpdateListDisplay()
     ListContainer:SetHeight(math.abs(yOffset))
 end
 
--- Tab Click Events
 TabNotes:SetScript("OnClick", function()
     currentTab = "note"
     UpdateListDisplay()
@@ -289,13 +282,13 @@ StaticPopupDialogs["FIELDNOTES_CONFIRM_FORCESAVE"] = {
     OnAccept = function()
         ReloadUI()
     end,
-    timeout = 0, -- Staysopen until clicked
-    whileDead = true, -- Works while dead
-    hideOnEscape = true, -- Closes with escape key
-    preferredIndex = 4, -- Avoid UI taint errors with blizz frames
+    timeout = 0,
+    whileDead = true,
+    hideOnEscape = true,
+    preferredIndex = 4,
 }
 
-SaveButton:SetScript("OnClick", function() -- New save functionality acts as a hard save to give the user an option to protect against a hard crash
+SaveButton:SetScript("OnClick", function()
     StaticPopup_Show("FIELDNOTES_CONFIRM_FORCESAVE")
 end)
 
@@ -313,7 +306,6 @@ EditorBox:SetScript("OnTextChanged",function(self,isUserInput)
         currentNoteID = time()
     end
 
-    -- Save the 'type' variable to the DB!
     FieldNotesDB[currentNoteID] = { 
         name = noteName,
         text = content,
@@ -326,7 +318,7 @@ end)
 
 AddButton:SetScript("OnClick", function()
     currentNoteID = nil
-    currentNoteType = currentTab -- New notes take on the type of the tab you are looking at
+    currentNoteType = currentTab
     EditorBox:SetText("")
     EditorBox:SetFocus()
     UpdateListDisplay()
@@ -338,20 +330,16 @@ StaticPopupDialogs["FIELDNOTES_CONFIRM_DELETE"] = {
     button2 = "No",
     OnAccept = function()
         if currentNoteID ~= nil then
-
             FieldNotesDB[currentNoteID] = nil
             currentNoteID = nil
             EditorBox:SetText("")
-
-            -- print("FieldNotes: Note deleted.")
-
             UpdateListDisplay()
         end
     end,
-    timeout = 0, -- Staysopen until clicked
-    whileDead = true, -- Works while dead
-    hideOnEscape = true, -- Closes with escape key
-    preferredIndex = 3, -- Avoid UI taint errors with blizz frames
+    timeout = 0,
+    whileDead = true,
+    hideOnEscape = true,
+    preferredIndex = 3,
 }
 
 DeleteButton:SetScript("OnClick", function()
@@ -360,9 +348,30 @@ DeleteButton:SetScript("OnClick", function()
     end
 end)
 
+ShareButton:SetScript("OnClick", function()
+    if currentNoteID ~= nil then
+        local playerName, playerRealm = UnitName("player")
+        local fullName = playerName
+        if playerRealm and playerRealm ~= "" then
+            fullName = playerName .. "-" .. playerRealm
+        end
+        
+        local safeName = FieldNotesDB[currentNoteID].name
+        safeName = string.gsub(safeName, "[\n\r]", " ")
+        
+        local plainTextTag = string.format("{FN:%s:%d:%s}", fullName, currentNoteID, safeName)
+        
+        C_Timer.After(0.1, function()
+            local editBox = ChatEdit_ChooseBoxForSend()
+            ChatEdit_ActivateChat(editBox)
+            editBox:Insert(plainTextTag)
+        end)
+    end
+end)
+
 BulletButton:SetScript("OnClick", function()
     EditorBox:Insert("- ")
-    EditorBox:SetFocus() -- Keeps your cursor in the box so you can keep typing!
+    EditorBox:SetFocus()
 end)
 
 TaskButton:SetScript("OnClick", function()
@@ -377,25 +386,18 @@ end)
 
 ------------------------------
 ---OBJECTIVE TRACKER BUTTON---
--------------------------------
+------------------------------
 
 local TrackerButton = CreateFrame("Button", "FieldNotesTrackerButton", UIParent)
-TrackerButton:SetSize(20, 20) -- Made it smaller to fit perfectly on that thin header bar
+TrackerButton:SetSize(20, 20)
 TrackerButton:SetFrameLevel(10)
-
--- THE FIX: We changed "HeaderMenu" to "Header" to match the modern WoW API!
 TrackerButton:SetPoint("RIGHT", ObjectiveTrackerFrame.Header.MinimizeButton, "LEFT", -5, 0)
-
--- Set the icon to a nice crisp scroll
 TrackerButton.Icon = TrackerButton:CreateTexture(nil, "ARTWORK")
 TrackerButton.Icon:SetAllPoints()
 TrackerButton.Icon:SetTexture("Interface\\Icons\\inv_misc_book_09")
-
--- Add a subtle highlight when you hover over it
 TrackerButton:SetHighlightTexture("Interface\\Buttons\\ButtonHilight-Square")
 TrackerButton:GetHighlightTexture():SetBlendMode("ADD")
 
--- Tooltip so people know what this tiny scroll does
 TrackerButton:SetScript("OnEnter", function(self)
     GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
     GameTooltip:SetText("Field Notes")
@@ -407,7 +409,6 @@ TrackerButton:SetScript("OnLeave", function()
     GameTooltip:Hide() 
 end)
 
--- Click to Open/Close your NoteFrame
 TrackerButton:SetScript("OnClick", function()
     if NoteFrame:IsShown() then
         NoteFrame:Hide()
@@ -422,51 +423,33 @@ end)
 
 local TranscribeBtn = CreateFrame("Button", "FieldNotesTranscribeBtn", ItemTextFrame, "UIPanelButtonTemplate")
 TranscribeBtn:SetSize(90, 22)
-
--- Anchor the TOP-LEFT of our button to the TOP-RIGHT edge of the book.
--- The '5' pushes it 5 pixels outward to the right so it doesn't sit flush on the border.
--- The '-45' moves it down slightly so it aligns nicely with the top of the parchment.
 TranscribeBtn:SetPoint("BOTTOMRIGHT", ItemTextFrame, "TOPRIGHT", 0, 0)
-
 TranscribeBtn:SetText("Transcribe")
-
--- Keep the frame level high just to ensure it stays above any background UI elements
 TranscribeBtn:SetFrameLevel(ItemTextFrame:GetFrameLevel() + 10)
 
 local isTranscribing = false
 local tempTranscription = ""
 local transcriptionTitle = ""
-
 local TranscriberCore = CreateFrame("Frame")
 TranscriberCore:RegisterEvent("ITEM_TEXT_READY")
 TranscriberCore:RegisterEvent("ITEM_TEXT_CLOSED")
 
 TranscriberCore:SetScript("OnEvent", function(self, event, ...)
     if event == "ITEM_TEXT_CLOSED" then
-        isTranscribing = false -- Failsafe to cancel if the player closes the book
+        isTranscribing = false
     elseif event == "ITEM_TEXT_READY" and isTranscribing then
-        -- The server has sent the text for the next page, grab it!
         tempTranscription = tempTranscription .. "\n\n" .. ItemTextGetText()
-        
         if ItemTextHasNextPage() then
-            ItemTextNextPage() -- Triggers another ITEM_TEXT_READY event
+            ItemTextNextPage()
         else
-            -- We've reached the end of the book
             isTranscribing = false
             local id = time()
-            
             FieldNotesDB[id] = {
                 name = transcriptionTitle,
                 text = tempTranscription,
                 id = id,
                 type = "transcription"
             }
-            
-            -- print("FieldNotes: Successfully transcribed '" .. transcriptionTitle .. "'!")
-            
-            -- Close the in-game book automatically when done
-            -- HideUIPanel(ItemTextFrame)
-            
             if NoteFrame:IsShown() and currentTab == "transcription" then
                 UpdateListDisplay()
             end
@@ -475,33 +458,155 @@ TranscriberCore:SetScript("OnEvent", function(self, event, ...)
 end)
 
 TranscribeBtn:SetScript("OnClick", function()
-    if isTranscribing then return end -- Don't run multiple times
-    
+    if isTranscribing then return end
     isTranscribing = true
     transcriptionTitle = ItemTextGetItem() or "Unknown Text"
-    tempTranscription = ItemTextGetText() -- Grab the first page
-
-    -- print("FieldNotes: Transcribing, please wait...")
-
+    tempTranscription = ItemTextGetText()
     if ItemTextHasNextPage() then
-        ItemTextNextPage() -- Start the chain reaction
+        ItemTextNextPage()
     else
-        -- It's a single page document
         isTranscribing = false
         local id = time()
-        
         FieldNotesDB[id] = {
             name = transcriptionTitle,
             text = tempTranscription,
             id = id,
             type = "transcription"
         }
-        
-        -- print("FieldNotes: Successfully transcribed '" .. transcriptionTitle .. "'!")
-        
         if NoteFrame:IsShown() and currentTab == "transcription" then
             UpdateListDisplay()
         end
+    end
+end)
+
+------------------------------
+---CHAT LINK FILTER SYSTEM----
+------------------------------
+
+local function FieldNotesChatFilter(self, event, msg, author, ...)
+    if msg and msg:find("{FN:") then
+        msg = msg:gsub("{FN:([^:]+):(%d+):([^}]*)}", function(pName, nID, nName)
+            return string.format("|cff00ccff|Hfieldnotereq:%s:%s|h[Field Notes: %s]|h|r", pName, nID, nName)
+        end)
+    end
+    return false, msg, author, ...
+end
+
+local chatEvents = {
+    "CHAT_MSG_SAY", "CHAT_MSG_YELL", "CHAT_MSG_GUILD", "CHAT_MSG_OFFICER",
+    "CHAT_MSG_PARTY", "CHAT_MSG_PARTY_LEADER", "CHAT_MSG_RAID", "CHAT_MSG_RAID_LEADER",
+    "CHAT_MSG_WHISPER", "CHAT_MSG_WHISPER_INFORM", "CHAT_MSG_INSTANCE_CHAT", "CHAT_MSG_INSTANCE_CHAT_LEADER"
+}
+
+for _, event in ipairs(chatEvents) do
+    ChatFrame_AddMessageEventFilter(event, FieldNotesChatFilter)
+end
+
+--------------------------------
+---NETWORKING & SHARE SYSTEM----
+--------------------------------
+
+local AddonPrefix = "FLDNOTES"
+C_ChatInfo.RegisterAddonMessagePrefix(AddonPrefix)
+local incomingBuffer = {}
+
+local function TransmitNote(targetPlayer, note)
+    local maxPayload = 200 
+    local textLen = string.len(note.text)
+    local totalChunks = math.ceil(textLen / maxPayload)
+    local metaStr = string.format("META:%d:%d:%s:%s", note.id, totalChunks, note.type or "note", note.name)
+    C_ChatInfo.SendAddonMessage(AddonPrefix, metaStr, "WHISPER", targetPlayer)
+
+    for i = 1, totalChunks do
+        local startPos = ((i - 1) * maxPayload) + 1
+        local endPos = i * maxPayload
+        local chunkText = string.sub(note.text, startPos, endPos)
+        local chunkStr = string.format("CHUNK:%d:%d:%s", note.id, i, chunkText)
+        C_ChatInfo.SendAddonMessage(AddonPrefix, chunkStr, "WHISPER", targetPlayer)
+    end
+end
+
+local CommFrame = CreateFrame("Frame")
+CommFrame:RegisterEvent("CHAT_MSG_ADDON")
+CommFrame:SetScript("OnEvent", function(self, event, prefix, text, channel, sender)
+    if prefix ~= AddonPrefix then return end
+    local senderName = Ambiguate(sender, "none")
+    if senderName == UnitName("player") then return end 
+
+    local command, payload = string.split(":", text, 2)
+
+    if command == "REQ" then
+        local requestedID = tonumber(payload)
+        local note = FieldNotesDB[requestedID]
+        if note then
+            TransmitNote(senderName, note)
+        end
+    elseif command == "META" then
+        local noteIDStr, totalChunksStr, noteType, noteName = string.split(":", payload, 4)
+        local noteID = tonumber(noteIDStr)
+        local totalChunks = tonumber(totalChunksStr)
+
+        incomingBuffer[noteID] = {
+            name = noteName,
+            type = noteType,
+            totalChunks = totalChunks,
+            chunks = {},
+            received = 0
+        }
+    elseif command == "CHUNK" then
+        local noteIDStr, chunkIndexStr, textData = string.split(":", payload, 3)
+        local noteID = tonumber(noteIDStr)
+        local chunkIndex = tonumber(chunkIndexStr)
+
+        if incomingBuffer[noteID] then
+            incomingBuffer[noteID].chunks[chunkIndex] = textData
+            incomingBuffer[noteID].received = incomingBuffer[noteID].received + 1
+
+            if incomingBuffer[noteID].received == incomingBuffer[noteID].totalChunks then
+                local fullText = ""
+                for i = 1, incomingBuffer[noteID].totalChunks do
+                    fullText = fullText .. (incomingBuffer[noteID].chunks[i] or "")
+                end
+
+                local newID = time()
+                FieldNotesDB[newID] = {
+                    id = newID,
+                    name = incomingBuffer[noteID].name,
+                    type = incomingBuffer[noteID].type,
+                    text = fullText
+                }
+
+                incomingBuffer[noteID] = nil
+
+                if NoteFrame:IsShown() then
+                    UpdateListDisplay()
+                end
+                print("|cFF00FF00FieldNotes:|r Received new note from " .. senderName)
+            end
+        end
+    end
+end)
+
+local function RequestNoteFromPlayer(targetPlayer, noteID)
+    local myName, myRealm = UnitName("player")
+    local myFullName = myName
+    if myRealm and myRealm ~= "" then 
+        myFullName = myName .. "-" .. myRealm 
+    end
+
+    if targetPlayer == myName or targetPlayer == myFullName then
+        print("|cFFFFFF00FieldNotes:|r You already have this note in your database.")
+        return
+    end
+
+    C_ChatInfo.SendAddonMessage(AddonPrefix, "REQ:"..noteID, "WHISPER", targetPlayer)
+    print("|cFFFFFF00FieldNotes:|r Requesting note from " .. targetPlayer .. "...")
+end
+
+hooksecurefunc("SetItemRef", function(link, text, button, chatFrame)
+    local linkType, targetPlayer, noteID = string.split(":", link)
+    if linkType == "fieldnotereq" then
+        RequestNoteFromPlayer(targetPlayer, noteID)
     end
 end)
 
@@ -516,10 +621,6 @@ loaderFrame:SetScript("OnEvent",function(self,event,addonName)
         if FieldNotesDB == nil then
             FieldNotesDB = {}
         end
-
         UpdateListDisplay()
-
-        -- print("FieldNotesDB: Notes loaded. Type /note to open.")
-
     end
 end)
