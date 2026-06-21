@@ -179,6 +179,72 @@ TaskDoneButton:SetPoint("LEFT", TaskButton, "RIGHT", 5, 0)
 TaskDoneButton:SetText("[x]")
 AddDelayedTooltip(TaskDoneButton, "Insert Completed Task")
 
+------------------------------
+---WAYPOINT SCANNER SYSTEM----
+------------------------------
+
+local WaypointAnchor = CreateFrame("Frame", nil, NoteFrame)
+WaypointAnchor:SetSize(1, 30)
+WaypointAnchor:SetPoint("RIGHT", ToolbarDivider, "RIGHT", 0, 0)
+
+local wpButtons = {}
+
+local function UpdateWaypoints(text)
+    -- Hide all existing buttons first
+    for _, btn in ipairs(wpButtons) do 
+        btn:Hide() 
+    end
+    
+    local cmds = {}
+    for wpCmd in string.gmatch(text, "(/way[^\n\r]*%d+%.?%d*%s+%d+%.?%d*)") do
+        table.insert(cmds, wpCmd)
+        if #cmds == 10 then break end
+    end
+    
+    local totalPins = #cmds
+    
+    for i = 1, totalPins do
+        if not wpButtons[i] then
+            local btn = CreateFrame("Button", nil, NoteFrame)
+            btn:SetSize(22, 22) 
+            
+            btn.Icon = btn:CreateTexture(nil, "ARTWORK")
+            btn.Icon:SetAllPoints()
+            btn.Icon:SetAtlas("Waypoint-MapPin-Tracked")
+            
+            local highlight = btn:CreateTexture(nil, "HIGHLIGHT")
+            highlight:SetAllPoints()
+            highlight:SetAtlas("Waypoint-MapPin-Tracked")
+            highlight:SetBlendMode("ADD")
+            highlight:SetAlpha(0.4)
+            
+            btn:SetScript("OnEnter", function(self)
+                GameTooltip:SetOwner(self, "ANCHOR_TOP")
+                GameTooltip:SetText("Add Pin")
+                GameTooltip:AddLine(self.cmd, 1, 1, 1, true)
+                GameTooltip:Show()
+            end)
+            btn:SetScript("OnLeave", function() GameTooltip:Hide() end)
+            
+            wpButtons[i] = btn
+        end
+        
+        local btn = wpButtons[i]
+        btn.cmd = cmds[i] 
+        
+        btn:SetScript("OnClick", function(self)
+            local editBox = ChatEdit_ChooseBoxForSend()
+            editBox:SetText(self.cmd)
+            ChatEdit_SendText(editBox, 0)
+        end)
+        
+        local xOffset = -((totalPins - i) * 24)
+        
+        btn:SetPoint("RIGHT", WaypointAnchor, "LEFT", xOffset, 0)
+        btn:Show()
+    end
+end
+
 ----------------------
 ---NOTE LIST UPDATE---
 ----------------------
@@ -243,6 +309,10 @@ local function UpdateListDisplay()
                 currentNoteID = noteData.id
                 currentNoteType = nType
                 EditorBox:SetText(noteData.text)
+                
+                if noteData.text ~= nil then
+                    UpdateWaypoints(noteData.text)
+                end
 
                 for _, b in ipairs(noteButtons) do
                     if b.noteID == currentNoteID then
@@ -295,6 +365,11 @@ end)
 EditorBox:SetScript("OnTextChanged",function(self,isUserInput)
     if not isUserInput then return end
     local content = self:GetText()
+    
+    if content ~= nil then
+        UpdateWaypoints(content)
+    end
+    
     if content == "" or content == nil then return end
 
     local noteName = string.sub(content, 1, 15) 

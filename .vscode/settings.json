@@ -26,6 +26,7 @@
         "ChatEdit_ActivateChat",
         "ChatEdit_ChooseBoxForSend",
         "ChatFrame_AddMessageEventFilter",
-        "ChatFrame_OpenChat"
+        "ChatFrame_OpenChat",
+        "ChatEdit_SendText"
     ]
 }
