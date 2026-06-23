@@ -14,6 +14,8 @@ Download the latest release from the Releases page or use WowUp's `Install from 
 
 ## Usage
 
+* Toggle visibility with the icon attached to the `Objective Tracker` frame
+
 **Creating Notes:**
 * Start writing or copy-paste from an alternate source. Notes autosave as you write but you have the option to hard-save as well.
 * Click `Transcribe` above other forms of media to make a copy. (HTML support in the pipeline)
