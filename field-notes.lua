@@ -190,7 +190,6 @@ WaypointAnchor:SetPoint("RIGHT", ToolbarDivider, "RIGHT", 0, 0)
 local wpButtons = {}
 
 local function UpdateWaypoints(text)
-    -- Hide all existing buttons first
     for _, btn in ipairs(wpButtons) do 
         btn:Hide() 
     end
