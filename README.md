@@ -26,3 +26,7 @@ Download the latest release from the Releases page or use WowUp's `Install from 
 
 **Sharing Notes:**
 * With a note open, clicking `Share` will send a link to your currently active chat channel. If another field-notes user clicks this, it will request the note from you and download a copy to their notes!
+
+## Versioning
+
+Version numbers follow the WoW patch they were built for, plus an addon revision: `<patch>.<revision>` — e.g. `12.1.0.1` is the first release for patch 12.1.0. The revision resets to `1` on each new patch. Git tags use the same string.
